@@ -1,10 +1,12 @@
 package com.xndfinance.dto.user;
 
-import java.time.LocalDateTime;
+import lombok.Builder;
 
+import java.util.UUID;
+
+@Builder
 public record UserResponseDTO(
-        Long id,
+        UUID id,
         String name,
-        String email,
-        LocalDateTime createdAt
+        String email
 ) {}

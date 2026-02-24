@@ -30,8 +30,4 @@ public class UserQueryService {
     public boolean existsById(UUID id) {
         return repository.existsById(id);
     }
-
-    public boolean existsByEmail(String email) {
-        return repository.existsByEmail(email);
-    }
 }

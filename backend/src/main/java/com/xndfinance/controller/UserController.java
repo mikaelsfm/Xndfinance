@@ -1,5 +1,6 @@
 package com.xndfinance.controller;
 
+import com.xndfinance.dto.user.UserResponseDTO;
 import com.xndfinance.model.User;
 import com.xndfinance.service.user.UserAuthService;
 import com.xndfinance.service.user.UserQueryService;
@@ -23,28 +24,18 @@ public class UserController {
     private final UserQueryService userQueryService;
     private final UserAuthService userAuthService;
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<User> createUser(@RequestBody User user) {
         log.info("Creating user with email: {}", user.getEmail());
-        try {
-            User createdUser = userService.createUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
-        } catch (RuntimeException e) {
-            log.error("Error creating user: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        User createdUser = userService.createUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestParam String email, @RequestParam String password) {
+    public ResponseEntity<UserResponseDTO> login(@RequestParam String email, @RequestParam String password) {
         log.info("Login attempt for email: {}", email);
-        try {
-            User authenticatedUser = userAuthService.login(email, password);
-            return ResponseEntity.ok(authenticatedUser);
-        } catch (RuntimeException e) {
-            log.error("Login failed for email: {}", email);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        UserResponseDTO authenticatedUser = userAuthService.login(email, password);
+        return ResponseEntity.ok(authenticatedUser);
     }
 
     @GetMapping
@@ -71,27 +62,17 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable UUID id, @RequestBody User userDetails) {
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable UUID id, @RequestBody User userDetails) {
         log.info("Updating user with ID: {}", id);
-        try {
-            User updatedUser = userService.updateUser(id, userDetails);
-            return ResponseEntity.ok(updatedUser);
-        } catch (RuntimeException e) {
-            log.error("Error updating user: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        UserResponseDTO updatedUser = userService.updateUser(id, userDetails);
+        return ResponseEntity.ok(updatedUser);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         log.info("Deleting user with ID: {}", id);
-        try {
-            userService.deleteUserById(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            log.error("Error deleting user: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        userService.deleteUserById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/exists")
