@@ -2,9 +2,11 @@ package com.xndfinance.model;
 
 import com.xndfinance.enumerators.AccountTypeEnum;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -21,10 +23,14 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @NotNull
+    @Column(nullable = false)
     private AccountTypeEnum type;
 
-    private Double balance;
+    private BigDecimal balance;
 
+    @NotNull
+    @Column(nullable = false)
     private String userId;
 
     @CreationTimestamp

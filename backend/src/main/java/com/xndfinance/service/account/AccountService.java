@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -36,7 +37,7 @@ public class AccountService {
 
     }
 
-    public Account updateBalance(UUID accountId, Double newBalance) {
+    public Account updateBalance(UUID accountId, BigDecimal newBalance) {
         log.info("Updating balance for account: {}", accountId);
 
         Account account = repository.findById(accountId)

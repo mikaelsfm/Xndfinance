@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,7 +51,7 @@ public class AccountController {
     }
 
     @PutMapping("/{id}/balance")
-    public ResponseEntity<Account> updateAccountBalance(@PathVariable UUID id, @RequestParam Double balance) {
+    public ResponseEntity<Account> updateAccountBalance(@PathVariable UUID id, @RequestParam BigDecimal balance) {
         log.info("Updating balance for account with ID: {}", id);
         Account updatedAccount = accountService.updateBalance(id, balance);
         return ResponseEntity.ok(updatedAccount);
