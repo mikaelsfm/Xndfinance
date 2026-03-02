@@ -1,4 +1,4 @@
-package com.xndfinance.xndfinance;
+package com.xndfinance;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
