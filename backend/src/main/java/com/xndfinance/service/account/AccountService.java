@@ -1,8 +1,10 @@
 package com.xndfinance.service.account;
 
+import com.xndfinance.dto.account.CreateAccountDTO;
 import com.xndfinance.exception.ApiException;
 import com.xndfinance.model.Account;
 import com.xndfinance.repository.AccountRepository;
+import com.xndfinance.service.user.UserQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,49 +21,65 @@ import java.util.UUID;
 @Slf4j
 public class AccountService {
 
-    private final AccountRepository repository;
+    private final AccountRepository accountRepository;
+    private final UserQueryService userQueryService;
+    private final AccountQueryService accountQueryService;
 
-    public Account createAccount(Account account) {
-        log.info("Creating account for user: {}", account.getUserId());
+    public Account createAccount(CreateAccountDTO accountRequestDTO) {
+        log.info("Creating account for user: {}", accountRequestDTO.userId());
 
-        if (repository.findByUserId(account.getUserId())
-                .filter(existingAccount -> account.getType() == existingAccount.getType())
-                .isPresent()) {
-            throw new ApiException("Account of type " + account.getType() + "for user " + account.getUserId() + " already exists");
+        boolean alreadyExists = accountQueryService.findByUserId(accountRequestDTO.userId())
+                .stream()
+                .anyMatch(account -> account.getType() == accountRequestDTO.type());
+
+        if (alreadyExists) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST,
+                    "Account of type " + accountRequestDTO.type() +
+                            " for user " + accountRequestDTO.userId() + " already exists"
+            );
         }
 
-        account.setCreatedAt(LocalDateTime.now());
-        Account saved = repository.save(account);
+        Account account = Account.builder()
+                .type(accountRequestDTO.type())
+                .balance(new BigDecimal(0))
+                .userId(accountRequestDTO.userId())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        Account saved = accountRepository.save(account);
         log.info("Account created successfully with ID: {}", saved.getId());
         return saved;
-
     }
 
     public Account updateBalance(UUID accountId, BigDecimal newBalance) {
         log.info("Updating balance for account: {}", accountId);
 
-        Account account = repository.findById(accountId)
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ApiException("Balance cannot be negative", HttpStatus.BAD_REQUEST);
+        }
+
+        Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> {
                     log.error("Account not found: {}", accountId);
                     return new ApiException(HttpStatus.NOT_FOUND, "Account not found");
                 });
 
         account.setBalance(newBalance);
-        Account updated = repository.save(account);
+        Account updated = accountRepository.save(account);
         log.info("Balance updated successfully for account: {}", updated.getId());
         return updated;
-
     }
 
     public void deleteAccount(UUID accountId) {
         log.info("Deleting account: {}", accountId);
 
-        if (!repository.existsById(accountId)) {
+        if (!accountRepository.existsById(accountId)) {
             log.error("Account not found: {}", accountId);
             throw new ApiException(HttpStatus.NOT_FOUND, "Account not found");
         }
 
-        repository.deleteById(accountId);
+        accountRepository.deleteById(accountId);
         log.info("Account deleted successfully: {}", accountId);
 
     }

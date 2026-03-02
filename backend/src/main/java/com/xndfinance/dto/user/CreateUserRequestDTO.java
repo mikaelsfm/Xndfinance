@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record CreateUserDTO(
+public record CreateUserRequestDTO(
     @NotBlank(message = "Name is required")
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
     String name,
@@ -15,5 +15,4 @@ public record CreateUserDTO(
 
     @Size(min = 6, message = "Password must be at least 6 characters")
     String password
-) {
-}
+) {}

@@ -1,10 +1,13 @@
 package com.xndfinance.controller;
 
+import com.xndfinance.dto.user.CreateUserRequestDTO;
+import com.xndfinance.dto.user.UpdateUserDTO;
 import com.xndfinance.dto.user.UserResponseDTO;
 import com.xndfinance.model.User;
 import com.xndfinance.service.user.UserAuthService;
 import com.xndfinance.service.user.UserQueryService;
 import com.xndfinance.service.user.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,10 +28,16 @@ public class UserController {
     private final UserAuthService userAuthService;
 
     @PostMapping("/register")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        log.info("Creating user with email: {}", user.getEmail());
-        User createdUser = userService.createUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody CreateUserRequestDTO userDTO) {
+        User createdUser = userService.createUser(userDTO);
+
+        UserResponseDTO response = new UserResponseDTO(
+                createdUser.getId(),
+                createdUser.getName(),
+                createdUser.getEmail()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
@@ -61,8 +70,8 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable UUID id, @RequestBody User userDetails) {
+    @PatchMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable UUID id, @RequestBody UpdateUserDTO userDetails) {
         log.info("Updating user with ID: {}", id);
         UserResponseDTO updatedUser = userService.updateUser(id, userDetails);
         return ResponseEntity.ok(updatedUser);

@@ -1,8 +1,11 @@
 package com.xndfinance.controller;
 
+import com.xndfinance.dto.account.CreateAccountDTO;
+import com.xndfinance.dto.account.UpdateBalanceDTO;
 import com.xndfinance.model.Account;
 import com.xndfinance.service.account.AccountQueryService;
 import com.xndfinance.service.account.AccountService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,9 +25,9 @@ public class AccountController {
     private final AccountQueryService accountQueryService;
 
     @PostMapping
-    public ResponseEntity<Account> createAccount(@RequestBody Account account) {
-        log.info("Creating account with type: {}", account.getType());
-        Account createdAccount = accountService.createAccount(account);
+    public ResponseEntity<Account> createAccount(@Valid @RequestBody CreateAccountDTO accountRequestDTO) {
+        log.info("Creating account with type: {}", accountRequestDTO.type());
+        Account createdAccount = accountService.createAccount(accountRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAccount);
     }
 
@@ -50,11 +53,10 @@ public class AccountController {
         return ResponseEntity.ok(accounts);
     }
 
-    @PutMapping("/{id}/balance")
-    public ResponseEntity<Account> updateAccountBalance(@PathVariable UUID id, @RequestParam BigDecimal balance) {
-        log.info("Updating balance for account with ID: {}", id);
-        Account updatedAccount = accountService.updateBalance(id, balance);
-        return ResponseEntity.ok(updatedAccount);
+    @PatchMapping("/{id}/balance")
+    public ResponseEntity<Account> updateBalance(@PathVariable UUID id, @Valid @RequestBody UpdateBalanceDTO balanceDTO) {
+        Account updated = accountService.updateBalance(id, balanceDTO.balance());
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")

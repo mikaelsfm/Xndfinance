@@ -1,5 +1,6 @@
 package com.xndfinance.controller;
 
+import com.xndfinance.dto.transaction.CreateTransactionDTO;
 import com.xndfinance.model.Transaction;
 import com.xndfinance.service.transaction.TransactionQueryService;
 import com.xndfinance.service.transaction.TransactionService;
@@ -21,10 +22,10 @@ public class TransactionController {
     private final TransactionService transactionService;
     private final TransactionQueryService transactionQueryService;
 
-    @PostMapping("/create")
-    public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {
-        log.info("Creating transaction", transaction.getId());
-        Transaction createdTransaction = transactionService.createTransaction(transaction);
+    @PostMapping
+    public ResponseEntity<Transaction> createTransaction(@RequestBody CreateTransactionDTO transactionDTO) {
+        log.info("Creating transaction for account: {}", transactionDTO.accountId());
+        Transaction createdTransaction = transactionService.createTransaction(transactionDTO);
         return  ResponseEntity.status(HttpStatus.CREATED).body(createdTransaction);
     }
 
@@ -45,7 +46,7 @@ public class TransactionController {
 
     @GetMapping("/account/{accountId}")
     public ResponseEntity<List<Transaction>> getTransactionsByAccountId(@PathVariable UUID accountId) {
-        log.debug("Retrieving all transactions for account", accountId);
+        log.debug("Retrieving all transactions for account {}", accountId);
         List<Transaction> transactions = transactionQueryService.findByAccountId(accountId);
         return ResponseEntity.ok(transactions);
     }

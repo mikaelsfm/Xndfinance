@@ -23,7 +23,7 @@ public class AccountQueryService {
         return repository.findAll();
     }
 
-    public Optional<Account> findByUserId(String userId) {
+    public List<Account> findByUserId(String userId) {
         return repository.findByUserId(userId);
     }
 

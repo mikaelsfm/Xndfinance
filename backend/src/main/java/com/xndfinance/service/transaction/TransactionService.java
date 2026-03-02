@@ -1,5 +1,6 @@
 package com.xndfinance.service.transaction;
 
+import com.xndfinance.dto.transaction.CreateTransactionDTO;
 import com.xndfinance.exception.ApiException;
 import com.xndfinance.model.Account;
 import com.xndfinance.model.Transaction;
@@ -10,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,24 +27,24 @@ public class TransactionService {
     private final AccountRepository accountRepository;
 
     @Transactional
-    public Transaction createTransaction(Transaction transaction) {
+    public Transaction createTransaction(CreateTransactionDTO transactionDTO) {
         log.info("Creating new transaction");
 
-        UUID accountId = transaction.getAccountId();
+        UUID accountId = transactionDTO.accountId();
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> {
                     log.error("Account not found for id: {}", accountId);
                     return new ApiException("Account not found", HttpStatus.NOT_FOUND);
                 });
 
-        if (transaction.getAmount() == null || transaction.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (transactionDTO.amount() == null || transactionDTO.amount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new ApiException("Amount must be greater than zero", HttpStatus.BAD_REQUEST);
         }
 
         BigDecimal currentBalance = account.getBalance();
-        BigDecimal amount = transaction.getAmount();
+        BigDecimal amount = transactionDTO.amount();
 
-        switch (transaction.getTransactionType()) {
+        switch (transactionDTO.transactionType()) {
             case INCOME -> {
                 currentBalance = currentBalance.add(amount);
             }
@@ -57,12 +57,16 @@ public class TransactionService {
             default -> throw new ApiException("Invalid transaction type", HttpStatus.BAD_REQUEST);
         }
 
-        account.setBalance(currentBalance);
-        accountRepository.save(account);
+        Transaction updatedAccount = Transaction.builder()
+                .accountId(transactionDTO.accountId())
+                .amount(transactionDTO.amount())
+                .transactionType(transactionDTO.transactionType())
+                .category(transactionDTO.category())
+                .description(transactionDTO.description())
+                .transactionTime(LocalDateTime.now())
+                .build();
 
-        transaction.setTransactionTime(LocalDateTime.now());
-
-        Transaction savedTransaction = transactionRepository.save(transaction);
+        Transaction savedTransaction = transactionRepository.save(updatedAccount);
 
         log.info("Transaction created successfully. Transaction id: {}", savedTransaction.getId());
 
